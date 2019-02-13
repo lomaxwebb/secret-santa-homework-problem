@@ -134,6 +134,7 @@ app.post('/', function(req, res) {
  //If JSON is provided in another supported type, convert to preferred type.
  if (jsonType !== 1) {
   req.body = convertToPreferredJsonFormat(req.body);
+  body = req.body;
   //console.log('Request body converted: ', JSON.stringify(req.body));
  }
 
