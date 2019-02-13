@@ -1,0 +1,90 @@
+
+ThoughtTrace,
+
+Thanks for the opportunity to complete this homework problem. It was a fun little assignment.
+
+-Lomax
+
+----------
+---------- HOW TO RUN THE APP LOCALLY
+----------
+
+This application makes use of Node.js and jQuery, hosting an API at localhost:3000/.
+To run the app locally, first ensure Node is installed on your machine.
+Download/clone the secret santa app to your local machine.
+Via command prompt / terminal, navigate to directory containing package.json.
+Run command: npm install.
+Run command: npm install -g nodemon.
+Run command: npm start.
+Now the endpoint should be active at localhost:3000/. Open secret-santa.html in browser to view the application.
+
+----------
+---------- HOW TO HIT API
+----------
+
+App runs on localhost:3000/.
+Using your favorite tool (I tested using Postman), send JSON data via a POST request to localhost:3000/.
+JSON should be provided in the following format:
+
+{
+    "Samus": {
+        "initialized": true,
+        "red": true
+    },
+    "Steve": {
+        "initialized": true,
+        "red": true,
+        "yellow": true
+    },
+    "Billy": {
+        "initialized": true,
+        "blue": true
+    },
+    "Thornton": {
+        "initialized": true,
+        "blue": true
+    }
+}
+
+The above JSON is composed of multiple keys representing names of secret santa participants.
+Each participant key is associated with another object, the first key of which must be "initialized," and each key of which must have a value of true.
+As many subsequent keys as desired may be provided for each participant, each one representing the name of an incompatibility group. Again, each key must have a value of true.
+(To understand incompatibility groups, please read HOW TO USE THE WEB APP below.)
+
+JSON response will be returned in the below format:
+
+{
+    "Samus": "Billy",
+    "Steve": "Thornton",
+    "Billy": "Steve",
+    "Thornton": "Samus"
+}
+
+Simply, this represents a list of secret santa pairs. Each key is a secret santa, each value the associated secret santa target.
+
+----------
+---------- HOW TO USE THE WEB APP
+----------
+
+Welcome to Secret Santa as a Service.
+
+The app allows a user to enter any number of secret santa participants. Each of these participants may, in turn, have themselves inserted into any number of "incompatibility groups." If two participants are members of a single incompatibility group, neither of these participants may be secret santa for the the other. For instance, if it is desired that a particular married couple should not be allowed to serve as secret santas for one another, both members of the couple may be added to a single group; perhaps we will name this group "smith," after their shared last name.
+
+To add a participant, simply enter the participant's name into the field labeled "participant name," then click the nearby "Add" button. When at least one participant has been submitted, an element will appear at the bottom of the page, listing each participant.
+
+To add an incompatibility group for a participant, enter the name of the incompatibility group into the field labeled "incompatibility group for ..." and then click the nearby "Add group" button. All incompatibility groups applicable to a given participant will appear beside the participant's name.
+
+To ensure two users are not able to become secret santas for one another, add the same incompatibility group name to both users. An incompatibility group can have as many members as desired and, as stated above, no member within that group may serve as secret santa for another member of the group.
+
+When all participants have been added and incompatibility groups set up as desired, the form may be submitted either by pressing the Submit button near the top of the page or by pressing the return key within the nearby "participant name" field. Upon submission the page's view will be cleared and replaced with a list of each participant along with the name of the person that the participant will serve as secret santa for.
+
+It is possible that a secret santa list cannot be generated from a given set of input data because the provided incompatibility groups do not allow any possible combination in which each participant has someone to serve as secret santa for. The user will be alerted in such a case, after submission of the form.
+
+Now to list a few subtleties:
+If the form is submitted with no input data provided, a blank screen will result.
+If the user attempts to add a participant with an identical name to another participant, the user will be prompted to not enter duplicate names.
+If the user attempts to add an incompatibility group to a participant who already has an associated incompatibility group with the same name, the result will be that the name of the group will appear twice for the user but it will be treated as a single incompatibility group.
+The focus of the app is obviously functionality rather than visual appeal or pretty CSS.
+Please kill the Nodejs server and run afresh for each time you wish to use the API. (In other words, run command "npm start" freshly in terminal before each API hit.)
+
+Have fun with Secret Santa as a Service.
