@@ -119,7 +119,7 @@ function convertToPreferredJsonFormat(jsonRequest) {
 
 app.post('/', function(req, res) {
 
- console.log('Request body received: ', JSON.stringify(req.body));
+ //console.log('Request body received: ', JSON.stringify(req.body));
 
  body = req.body;
 
@@ -134,7 +134,7 @@ app.post('/', function(req, res) {
  //If JSON is provided in another supported type, convert to preferred type.
  if (jsonType !== 1) {
   req.body = convertToPreferredJsonFormat(req.body);
-  console.log('Request body converted: ', JSON.stringify(req.body));
+  //console.log('Request body converted: ', JSON.stringify(req.body));
  }
 
  //populate global variables
