@@ -12,17 +12,8 @@ app.use(parser.urlencoded({extended: false}));
 app.use(parser.json());
 app.use(cors());
 
-//global variables
-var secretSantaIsImpossible = false;          //switch indicating whether or not it's possible to generate secret santas for everyone in given list
-var jsonResponse = {};                  //object we will populate and send back as response
-var body = {};                      //This object and the few variables below it are necessary helper variables for some of the algorithms of this API.
-var jsonType = 0;                     //This API can handle two different formats of JSON payloads; this variable will denote which type is being used.
-var unselectedParticipants = [],
- unselectedParticipantsHelper = [];
-var participants = [];
-
 //Check two participants to see if they are in any of the same incompatibility groups.
-function pairIsCompatible(participant1, participant2) {
+function pairIsCompatible(participant1, participant2, body) {
  var compatible = true;
  for (var key in body) {
   if (key.substring(0, key.indexOf('[')) === participant1) {
@@ -46,7 +37,7 @@ function pairIsCompatible(participant1, participant2) {
 }
 
 //Check that a participant does not already belong to another secret santa.
-function participantIsAvailable(participant) {
+function participantIsAvailable(participant, jsonResponse) {
  var isAvailable = true;
  for(var key in jsonResponse) {
   if (jsonResponse[key] === participant) {
@@ -58,13 +49,13 @@ function participantIsAvailable(participant) {
 
 //Check to see if there are any secret santas who are able to give up their current targets.
 //If a secret santa could have another viable target, he/she is capable of trading his/her current target with someone else that lacks a viable target.
-function swapWithOtherParticipant(participant) {
+function swapWithOtherParticipant(participant, jsonResponse, unselectedParticipants, unselectedParticipantsHelper, participants, body) {
  var swapIsPossible = false;
  for(var key in jsonResponse) {
-  if (pairIsCompatible(participant, jsonResponse[key])) {
+  if (pairIsCompatible(participant, jsonResponse[key], body) && participant !== jsonResponse[key]) {
    for(var k=0; k<participants.length; k++) {
-    if (participantIsAvailable(participants[k])
-     && pairIsCompatible(key, participants[k])
+    if (participantIsAvailable(participants[k], jsonResponse)
+     && pairIsCompatible(key, participants[k], body)
      && key !== participants[k]) {
      swapIsPossible = true;
      jsonResponse[participant] = jsonResponse[key];
@@ -82,24 +73,24 @@ function swapWithOtherParticipant(participant) {
 }
 
 //Generate target for a participant to be a secret santa for, if possible.
-function selectPartners(participant) {
+function selectPartners(participant, secretSantaIsImpossible, unselectedParticipants, unselectedParticipantsHelper, participants, jsonResponse, body) {
  var randomNumber = Math.floor(Math.random() * (unselectedParticipantsHelper.length));
- if (pairIsCompatible(participant, unselectedParticipantsHelper[randomNumber])
-  && participantIsAvailable(unselectedParticipantsHelper[randomNumber])) {
+ if (pairIsCompatible(participant, unselectedParticipantsHelper[randomNumber], body)
+  && participantIsAvailable(unselectedParticipantsHelper[randomNumber], jsonResponse)) {
   jsonResponse[participant] = unselectedParticipantsHelper[randomNumber];
   unselectedParticipantsHelper.splice(randomNumber, 1);
  }
   else {
    unselectedParticipantsHelper.splice(randomNumber, 1);
    if (unselectedParticipantsHelper.length > 0) {
-    selectPartners(participant);
+    selectPartners(participant, secretSantaIsImpossible, unselectedParticipants, unselectedParticipantsHelper, participants, jsonResponse, body);
    }
     else {
-     if (!swapWithOtherParticipant(participant)) {
-      secretSantaIsImpossible = true;
+     if (!swapWithOtherParticipant(participant, jsonResponse, unselectedParticipants, unselectedParticipantsHelper, participants, body)) {
+      secretSantaIsImpossible.isImpossible = true;
      }
      else {
-      selectPartners(participant);
+      selectPartners(participant, secretSantaIsImpossible, unselectedParticipants, unselectedParticipantsHelper, participants, jsonResponse, body);
      }
     }
   }
@@ -118,6 +109,17 @@ function convertToPreferredJsonFormat(jsonRequest) {
 }
 
 app.post('/', function(req, res) {
+
+ //variables
+ var secretSantaIsImpossible = {          //switch indicating whether or not it's possible to generate secret santas for everyone in given list
+  isImpossible: false
+ };
+ var jsonResponse = {};                  //object we will populate and send back as response
+ var body = {};                      //This object and the few variables below it are necessary helper variables for some of the algorithms of this API.
+ var jsonType = 0;                     //This API can handle two different formats of JSON payloads; this variable will denote which type is being used.
+ var unselectedParticipants = [],
+  unselectedParticipantsHelper = [];
+ var participants = [];
 
  //console.log('Request body received: ', JSON.stringify(req.body));
 
@@ -162,11 +164,11 @@ app.post('/', function(req, res) {
     unselectedParticipantsHelper.splice(i, 1);
    }
   }
-  selectPartners(participants[j]);
+  selectPartners(participants[j], secretSantaIsImpossible, unselectedParticipants, unselectedParticipantsHelper, participants, jsonResponse, body);
  }
 
  //If we've determined that a full set of secret santas cannot be generated from the input, denote this by responding with an empty object.
- if (secretSantaIsImpossible) {
+ if (secretSantaIsImpossible.isImpossible) {
   jsonResponse = { secretSantaIsImpossible: true };
  }
 
