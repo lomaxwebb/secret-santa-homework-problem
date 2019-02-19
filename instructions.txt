@@ -85,6 +85,5 @@ If the form is submitted with no input data provided, a blank screen will result
 If the user attempts to add a participant with an identical name to another participant, the user will be prompted to not enter duplicate names.
 If the user attempts to add an incompatibility group to a participant who already has an associated incompatibility group with the same name, the result will be that the name of the group will appear twice for the user but it will be treated as a single incompatibility group.
 The focus of the app is obviously functionality rather than visual appeal or pretty CSS.
-Please kill the Nodejs server and run afresh for each time you wish to use the API. (In other words, run command "npm start" freshly in terminal before each API hit.)
 
 Have fun with Secret Santa as a Service.
